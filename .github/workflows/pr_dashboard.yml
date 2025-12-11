@@ -1,0 +1,47 @@
+name: Build PR Dashboard
+
+# allow manual run and schedule
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '0 * * * *'   # every hour; adjust as you like
+
+permissions:
+  contents: write     # so workflow can push updated docs/data.json
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install PyGithub
+
+      - name: Generate PR metrics
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STALE_DAYS: '7'   # optional: override in repository secrets or workflow dispatch
+        run: python scripts/generate_dashboard.py
+
+      - name: Commit and push data.json if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data.json
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update dashboard data [ci skip]" || true
+            git push origin HEAD:${{ github.ref_name }}
+          fi
+

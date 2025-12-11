@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PR Responsiveness Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 1100px; margin: auto; }
+    header { display:flex; align-items:center; justify-content:space-between; }
+    h1 { margin: 0; font-size: 1.6rem; }
+    .card { border: 1px solid #eee; padding: 12px; border-radius: 8px; margin-bottom:12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
+    table { width:100%; border-collapse:collapse; }
+    th, td { padding:8px; text-align:left; border-bottom:1px solid #f0f0f0; }
+    .muted { color:#666; font-size:0.9rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>PR Responsiveness Dashboard</h1>
+    <div class="muted" id="lastUpdated">—</div>
+  </header>
+
+  <section class="card" id="overview"></section>
+
+  <section class="card">
+    <h2>Long-standing / Stale PRs</h2>
+    <table id="staleTable">
+      <thead>
+        <tr><th>#</th><th>Title</th><th>Days Open</th><th>Last Updated (hrs)</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>Chart: Days Open (stale PRs)</h2>
+    <canvas id="staleChart" height="120"></canvas>
+  </section>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
+
