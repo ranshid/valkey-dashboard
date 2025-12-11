@@ -1,45 +1,66 @@
-async function loadData(){
-  try {
-    const resp = await fetch('data.json', {cache: "no-store"});
-    if (!resp.ok) throw new Error('data.json not found');
-    const data = await resp.json();
+const PRS_PER_PAGE = 10;
+let currentPage = 1;
+let lingeringPRs = [];
 
-    document.getElementById('lastUpdated').textContent = 'Data updated: ' + (data.generated_at || 'unknown');
+async function loadData() {
+  const resp = await fetch("data.json", {cache: "no-store"});
+  const data = await resp.json();
 
-    document.getElementById('overview').innerHTML = `
-      <strong>Total open PRs:</strong> ${data.total_open_prs} <br/>
-      <strong>Mean hours since last update:</strong> ${data.mean_response_hours ? data.mean_response_hours.toFixed(1) : '—'} hrs <br/>
-      <strong>PRs older than threshold:</strong> ${data.stale_prs.length}
-    `;
+  // Filter lingering PRs (last update >= 7 days)
+  lingeringPRs = (data.stale_prs || []).concat(
+    (data.total_prs || []).filter(pr => pr.last_updated_hours >= 24*7)
+  );
 
-    const tbody = document.querySelector('#staleTable tbody');
-    tbody.innerHTML = '';
-    data.stale_prs.forEach(pr => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${pr.number}</td><td><a href="${pr.html_url}" target="_blank">${escapeHtml(pr.title)}</a></td><td>${pr.days_open}</td><td>${pr.last_updated_hours}</td>`;
-      tbody.appendChild(tr);
+  // Sort descending by days open or hours since last update
+  lingeringPRs.sort((a,b) => (b.days_open || 0) - (a.days_open || 0));
+
+  renderTable();
+  renderPagination();
+}
+
+function renderTable() {
+  const tbody = document.querySelector("#prTable tbody");
+  tbody.innerHTML = "";
+  const start = (currentPage - 1) * PRS_PER_PAGE;
+  const end = start + PRS_PER_PAGE;
+  const pagePRs = lingeringPRs.slice(start, end);
+
+  pagePRs.forEach(pr => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${pr.number}</td>
+                    <td><a href="${pr.html_url}" target="_blank">${escapeHtml(pr.title)}</a></td>
+                    <td>${pr.days_open ?? Math.round((pr.last_updated_hours||0)/24)}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  if(pagePRs.length === 0) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td colspan="3" style="text-align:center;">No lingering PRs</td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+function renderPagination() {
+  const pagination = document.getElementById("pagination");
+  pagination.innerHTML = "";
+  const totalPages = Math.ceil(lingeringPRs.length / PRS_PER_PAGE);
+  if(totalPages <= 1) return;
+
+  for(let i = 1; i <= totalPages; i++){
+    const btn = document.createElement("button");
+    btn.textContent = i;
+    if(i === currentPage) btn.disabled = true;
+    btn.addEventListener("click", () => {
+      currentPage = i;
+      renderTable();
+      renderPagination();
     });
-
-    // Chart
-    const labels = data.stale_prs.map(p => '#' + p.number);
-    const values = data.stale_prs.map(p => p.days_open);
-    const ctx = document.getElementById('staleChart').getContext('2d');
-    if(window._staleChart) window._staleChart.destroy();
-    window._staleChart = new Chart(ctx, {
-      type: 'bar',
-      data: { labels, datasets: [{ label: 'Days Open', data: values }] },
-      options: { responsive: true, maintainAspectRatio: false }
-    });
-
-  } catch (err) {
-    document.getElementById('overview').innerHTML = '<strong>Error loading data.json</strong><br/>' + err;
-    console.error(err);
+    pagination.appendChild(btn);
   }
 }
 
 function escapeHtml(text) {
-  return text.replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+  return text.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 }
 
 loadData();
-
