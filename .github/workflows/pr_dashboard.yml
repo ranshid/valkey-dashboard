@@ -28,7 +28,7 @@ jobs:
 
       - name: Generate PR metrics
         env:
-          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_REPOSITORY: "valkey-io/valkey"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           STALE_DAYS: '7'   # optional: override in repository secrets or workflow dispatch
         run: python scripts/generate_dashboard.py
