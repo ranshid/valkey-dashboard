@@ -1,13 +1,20 @@
-name: Generate Dashboard
+name: Generate and Deploy Dashboard
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 0 * * *" # daily at midnight UTC
+    - cron: "0 0 * * *"  # daily at midnight UTC
+
+# Required permissions for GitHub Pages deployment
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -22,13 +29,15 @@ jobs:
       - name: Install dependencies
         run: pip install PyGithub pandas python-dateutil
 
-      - name: Generate PR data
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: "valkey-io/valkey"
+      - name: Skip generating PR data
         run: |
-          echo "Skipping generate_dashboard.py due to API rate limits. Using local data.json for metrics."
-        # python scripts/generate_dashboard.py
+          echo "Skipping generate_dashboard.py due to API rate limits. Using local data.json."
 
       - name: Compute metrics
         run: python scripts/compute_data_metrics.py
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v1
+        with:
+          branch: gh-pages   # branch to deploy
+          folder: docs       # folder to publish
