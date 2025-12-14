@@ -16,30 +16,69 @@
       text-align: center;
     }
 
-    #chart-container {
+    #chart-container,
+    #table-container {
       width: 90%;
       max-width: 1000px;
-      margin: auto;
+      margin: 30px auto;
       background: white;
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th,
+    td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
     }
   </style>
 </head>
 
 <body>
   <h1>Valkey Dashboard</h1>
+
   <div id="chart-container">
     <canvas id="prChart" width="800" height="400"></canvas>
+  </div>
+
+  <div id="table-container">
+    <h2>Top Stale PRs</h2>
+    <table id="staleTable">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Author</th>
+          <th>Reviewers</th>
+          <th>Created At</th>
+          <th>Last Comment At</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
 
   <script>
     fetch("metrics.json")
       .then(response => response.json())
       .then(data => {
+        // --- Chart ---
         const weekly = data.weekly || [];
-
         const labels = weekly.map(d => d.week);
         const opened = weekly.map(d => d.opened);
         const closed = weekly.map(d => d.closed);
@@ -47,7 +86,7 @@
 
         const ctx = document.getElementById('prChart').getContext('2d');
 
-        const prChart = new Chart(ctx, {
+        new Chart(ctx, {
           type: 'bar',
           data: {
             labels: labels,
@@ -88,49 +127,38 @@
                 type: 'linear',
                 display: true,
                 position: 'left',
-                title: {
-                  display: true,
-                  text: 'PR count'
-                }
+                title: { display: true, text: 'PR count' }
               },
               deltaAxis: {
                 type: 'linear',
                 display: true,
                 position: 'right',
-                grid: {
-                  drawOnChartArea: false
-                },
-                title: {
-                  display: true,
-                  text: 'Delta PRs'
-                }
+                grid: { drawOnChartArea: false },
+                title: { display: true, text: 'Delta PRs' }
               }
             },
             plugins: {
-              legend: {
-                position: 'top'
-              },
-              tooltip: {
-                mode: 'index',
-                intersect: false
-              },
-              annotation: {
-                annotations: delta.map((d, i) => ({
-                  type: 'label',
-                  xValue: labels[i],
-                  yValue: d,
-                  backgroundColor: 'transparent',
-                  content: [d.toString()],
-                  font: {
-                    weight: 'bold',
-                    size: 12
-                  },
-                  yAdjust: -10
-                }))
-              }
+              legend: { position: 'top' },
+              tooltip: { mode: 'index', intersect: false }
             }
           }
         });
+
+        // --- Top Stale PRs Table ---
+        const stalePRs = data.stale_prs || [];
+        const tbody = document.querySelector("#staleTable tbody");
+        stalePRs.forEach(pr => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${pr.title}</td>
+            <td>${pr.author}</td>
+            <td>${pr.reviewers.join(", ")}</td>
+            <td>${new Date(pr.created_at).toLocaleString()}</td>
+            <td>${pr.last_comment_at ? new Date(pr.last_comment_at).toLocaleString() : "N/A"}</td>
+          `;
+          tbody.appendChild(row);
+        });
+
       })
       .catch(err => console.error("Failed to load metrics.json:", err));
   </script>
