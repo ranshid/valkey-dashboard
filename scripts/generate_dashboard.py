@@ -9,7 +9,7 @@ def iso(dt):
 
 def main():
     token = os.getenv("GITHUB_TOKEN")
-    repo_full = os.getenv("GITHUB_REPOSITORY")
+    repo_full = os.getenv("TARGET_REPOSITORY") or os.getenv("GITHUB_REPOSITORY")
     if not token or not repo_full:
         raise SystemExit("GITHUB_TOKEN and GITHUB_REPOSITORY required")
 
