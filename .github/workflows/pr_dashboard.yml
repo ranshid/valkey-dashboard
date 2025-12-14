@@ -32,9 +32,6 @@ jobs:
       - name: Skip generating PR data
         run: |
           echo "Skipping generate_dashboard.py due to API rate limits. Using local data.json."
-          env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
 
       - name: Compute metrics
         run: python scripts/compute_data_metrics.py
