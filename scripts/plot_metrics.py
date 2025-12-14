@@ -55,7 +55,7 @@ plt.tight_layout()
 plt.savefig(os.path.join(OUTPUT_DIR, "pr_closed_per_week.png"))
 plt.close()
 
-# -------- 3: Staleness P50, p95, P100 per week --------
+# -------- 3: Staleness P50, p99, P100 per week --------
 stale_df = pd.DataFrame(metrics["stale_weekly_metrics"]).T
 stale_df.index = [datetime.fromisocalendar(int(w.split("-W")[0]), int(w.split("-W")[1]), 1)
                   for w in stale_df.index]
@@ -63,7 +63,7 @@ stale_df = stale_df[stale_df.index >= cutoff]
 
 plt.figure(figsize=(14,5))
 plt.plot(stale_df.index, stale_df["p50"], label="P50")
-plt.plot(stale_df.index, stale_df["p95"], label="P95")
+plt.plot(stale_df.index, stale_df["p99"], label="p99")
 plt.plot(stale_df.index, stale_df["p100"], label="P100")
 plt.title("PR Staleness (hours) per Week")
 plt.xlabel("Week")
@@ -74,7 +74,7 @@ plt.tight_layout()
 plt.savefig(os.path.join(OUTPUT_DIR, "staleness_per_week.png"))
 plt.close()
 
-# -------- 4: Response Time P50, p95, P100 per week --------
+# -------- 4: Response Time P50, p99, P100 per week --------
 resp_df = pd.DataFrame(metrics["response_weekly_metrics"]).T
 resp_df.index = [datetime.fromisocalendar(int(w.split("-W")[0]), int(w.split("-W")[1]), 1)
                  for w in resp_df.index]
@@ -82,7 +82,7 @@ resp_df = resp_df[resp_df.index >= cutoff]
 
 plt.figure(figsize=(14,5))
 plt.plot(resp_df.index, resp_df["p50"], label="P50")
-plt.plot(resp_df.index, resp_df["p95"], label="P95")
+plt.plot(resp_df.index, resp_df["p99"], label="p99")
 plt.plot(resp_df.index, resp_df["p100"], label="P100")
 plt.title("PR Response Time (hours) per Week")
 plt.xlabel("Week")

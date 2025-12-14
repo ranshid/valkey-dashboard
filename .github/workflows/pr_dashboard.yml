@@ -26,7 +26,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: "valkey-io/valkey"
-        run: python scripts/generate_dashboard.py
+        run: |
+          echo "Skipping generate_dashboard.py due to API rate limits. Using local data.json for metrics."
+        # python scripts/generate_dashboard.py
 
       - name: Compute metrics
         run: python scripts/compute_metrics.py
