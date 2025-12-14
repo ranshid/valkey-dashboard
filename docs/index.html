@@ -8,159 +8,170 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 40px;
-      background-color: #f5f5f5;
+      margin: 20px;
     }
 
-    h1 {
-      text-align: center;
-    }
-
-    #chart-container,
-    #table-container {
-      width: 90%;
-      max-width: 1000px;
-      margin: 30px auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    .chart-container {
+      width: 100%;
+      max-width: 1200px;
+      margin-bottom: 50px;
     }
 
     table {
-      width: 100%;
       border-collapse: collapse;
-      margin-top: 10px;
+      width: 100%;
     }
 
     th,
     td {
-      border: 1px solid #ddd;
+      border: 1px solid #ccc;
       padding: 8px;
       text-align: left;
     }
 
     th {
-      background-color: #f2f2f2;
-    }
-
-    tr:nth-child(even) {
-      background-color: #f9f9f9;
+      background: #f2f2f2;
     }
   </style>
 </head>
 
 <body>
   <h1>Valkey Dashboard</h1>
-
-  <div id="chart-container">
-    <canvas id="prChart" width="800" height="400"></canvas>
+  <div class="chart-container">
+    <canvas id="prCreationChart"></canvas>
   </div>
-
-  <div id="table-container">
-    <h2>Top Stale PRs</h2>
-    <table id="staleTable">
-      <thead>
-        <tr>
-          <th>Title</th>
-          <th>Author</th>
-          <th>Reviewers</th>
-          <th>Created At</th>
-          <th>Last Comment At</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+  <div class="chart-container">
+    <canvas id="prClosedChart"></canvas>
   </div>
+  <div class="chart-container">
+    <canvas id="stalenessChart"></canvas>
+  </div>
+  <div class="chart-container">
+    <canvas id="responseChart"></canvas>
+  </div>
+  <h2>Top Stale PRs</h2>
+  <table id="topStalePRs">
+    <thead>
+      <tr>
+        <th>PR</th>
+        <th>Title</th>
+        <th>Author</th>
+        <th>Reviewers</th>
+        <th>Created</th>
+        <th>Last Event</th>
+        <th>Stale Hours</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
   <script>
-    fetch("metrics.json")
-      .then(response => response.json())
-      .then(data => {
-        // --- Chart ---
-        const weekly = data.weekly || [];
-        const labels = weekly.map(d => d.week);
-        const opened = weekly.map(d => d.opened);
-        const closed = weekly.map(d => d.closed);
-        const delta = weekly.map(d => d.opened - d.closed);
+    async function fetchMetrics() {
+      const res = await fetch('metrics.json');
+      const data = await res.json();
+      return data;
+    }
 
-        const ctx = document.getElementById('prChart').getContext('2d');
-
-        new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels: labels,
-            datasets: [
-              {
-                label: 'Opened PRs',
-                data: opened,
-                backgroundColor: 'rgba(54, 162, 235, 0.7)'
-              },
-              {
-                label: 'Closed PRs',
-                data: closed,
-                backgroundColor: 'rgba(75, 192, 192, 0.7)'
-              },
-              {
-                label: 'Delta (Opened − Closed)',
-                data: delta,
-                type: 'line',
-                yAxisID: 'deltaAxis',
-                borderColor: 'red',
-                borderWidth: 3,
-                fill: false,
-                tension: 0.2,
-                pointRadius: 5,
-                pointBackgroundColor: 'red'
-              }
-            ]
+    function plotWeeklyChart(ctx, labels, datasets, title) {
+      new Chart(ctx, {
+        type: 'line',
+        data: { labels, datasets },
+        options: {
+          responsive: true,
+          plugins: {
+            title: { display: true, text: title },
+            legend: { display: true }
           },
-          options: {
-            responsive: true,
-            interaction: {
-              mode: 'index',
-              intersect: false,
-            },
-            stacked: false,
-            scales: {
-              y: {
-                type: 'linear',
-                display: true,
-                position: 'left',
-                title: { display: true, text: 'PR count' }
-              },
-              deltaAxis: {
-                type: 'linear',
-                display: true,
-                position: 'right',
-                grid: { drawOnChartArea: false },
-                title: { display: true, text: 'Delta PRs' }
-              }
-            },
-            plugins: {
-              legend: { position: 'top' },
-              tooltip: { mode: 'index', intersect: false }
-            }
+          scales: {
+            x: { display: true, title: { display: true, text: 'Week' } },
+            y: { display: true }
           }
-        });
+        }
+      });
+    }
 
-        // --- Top Stale PRs Table ---
-        const stalePRs = data.stale_prs || [];
-        const tbody = document.querySelector("#staleTable tbody");
-        stalePRs.forEach(pr => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${pr.title}</td>
-            <td>${pr.author}</td>
-            <td>${pr.reviewers.join(", ")}</td>
-            <td>${new Date(pr.created_at).toLocaleString()}</td>
-            <td>${pr.last_comment_at ? new Date(pr.last_comment_at).toLocaleString() : "N/A"}</td>
-          `;
-          tbody.appendChild(row);
-        });
+    function populateTopStaleTable(prs) {
+      const tbody = document.querySelector('#topStalePRs tbody');
+      prs.forEach(pr => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><a href="${pr.url}" target="_blank">#${pr.number}</a></td>
+          <td>${pr.title}</td>
+          <td>${pr.author || ''}</td>
+          <td>${pr.reviewers.join(', ')}</td>
+          <td>${pr.created_at}</td>
+          <td>${pr.last_event_at}</td>
+          <td>${pr.stale_hours.toFixed(1)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
 
-      })
-      .catch(err => console.error("Failed to load metrics.json:", err));
+    function prepareLabelsAndData(weeklyDict) {
+      const entries = Object.entries(weeklyDict).sort((a, b) => new Date(a[0]) - new Date(b[0]));
+      const labels = entries.map(e => e[0]);
+      const values = entries.map(e => e[1]);
+      return { labels, values };
+    }
+
+    (async () => {
+      const metrics = await fetchMetrics();
+
+      // PR Creation
+      const creation = prepareLabelsAndData(metrics.pr_creation_weekly);
+      plotWeeklyChart(
+        document.getElementById('prCreationChart').getContext('2d'),
+        creation.labels,
+        [{ label: 'PRs Created', data: creation.values, borderColor: 'blue', fill: false }],
+        'PR Creation per Week'
+      );
+
+      // PR Closed
+      const closed = prepareLabelsAndData(metrics.pr_close_weekly);
+      plotWeeklyChart(
+        document.getElementById('prClosedChart').getContext('2d'),
+        closed.labels,
+        [{ label: 'PRs Closed', data: closed.values, borderColor: 'orange', fill: false }],
+        'PR Closed per Week'
+      );
+
+      // Staleness P50, P99, P100
+      const staleLabels = Object.keys(metrics.stale_weekly_metrics).sort();
+      const p50 = staleLabels.map(w => metrics.stale_weekly_metrics[w].p50);
+      const p99 = staleLabels.map(w => metrics.stale_weekly_metrics[w].p99);
+      const p100 = staleLabels.map(w => metrics.stale_weekly_metrics[w].p100);
+
+      plotWeeklyChart(
+        document.getElementById('stalenessChart').getContext('2d'),
+        staleLabels,
+        [
+          { label: 'P50', data: p50, borderColor: 'green', fill: false },
+          { label: 'P99', data: p99, borderColor: 'red', fill: false },
+          { label: 'P100', data: p100, borderColor: 'black', fill: false }
+        ],
+        'PR Staleness (hours) per Week'
+      );
+
+      // Response time P50, P99, P100
+      const respLabels = Object.keys(metrics.response_weekly_metrics).sort();
+      const r50 = respLabels.map(w => metrics.response_weekly_metrics[w].p50);
+      const r99 = respLabels.map(w => metrics.response_weekly_metrics[w].p99);
+      const r100 = respLabels.map(w => metrics.response_weekly_metrics[w].p100);
+
+      plotWeeklyChart(
+        document.getElementById('responseChart').getContext('2d'),
+        respLabels,
+        [
+          { label: 'P50', data: r50, borderColor: 'green', fill: false },
+          { label: 'P99', data: r99, borderColor: 'red', fill: false },
+          { label: 'P100', data: r100, borderColor: 'black', fill: false }
+        ],
+        'PR Response Time (hours) per Week'
+      );
+
+      // Top Stale PRs
+      populateTopStaleTable(metrics.top_stale_prs);
+    })();
   </script>
 </body>
 
