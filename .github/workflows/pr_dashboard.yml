@@ -31,4 +31,4 @@ jobs:
         # python scripts/generate_dashboard.py
 
       - name: Compute metrics
-        run: python scripts/compute_metrics.py
+        run: python scripts/compute_data_metrics.py
