@@ -5,40 +5,55 @@ on:
   schedule:
     - cron: "0 0 * * *"  # daily at midnight UTC
 
-# Required permissions for GitHub Pages deployment
+# Permissions needed for Pages deployment
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: read        # allow reading repo files
+  pages: write          # allow creating/updating GitHub Pages deployment
+  id-token: write       # required for deploy-pages action
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # 2️⃣ Set up Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
+      # 3️⃣ Install dependencies
       - name: Install dependencies
         run: pip install PyGithub pandas python-dateutil
 
+      # 4️⃣ Skip PR generation (API limits)
       - name: Skip generating PR data
         run: |
-          echo "Skipping generate_dashboard.py due to API rate limits. Using local data.json."
+          echo "Skipping generate_dashboard.py due to API rate limits."
+          echo "Using local data.json."
 
+      # 5️⃣ Compute metrics (write metrics.json to docs/)
       - name: Compute metrics
         run: python scripts/compute_data_metrics.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          METRICS_PATH: docs/metrics.json   # ensure metrics.json is written inside docs/
 
+      # 6️⃣ Upload docs/ folder as artifact
+      - name: Upload site artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: github-pages
+          path: docs
+
+      # 7️⃣ Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v1
-        with:
-          token: ${{ secrets.PAT_TOKEN }}
-          branch: gh-pages   # branch to deploy
-          folder: docs       # folder to publish
+
