@@ -3,66 +3,75 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Lingering PRs Dashboard</title>
+  <title>PR Health Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 20px;
-      max-width: 900px;
+      max-width: 1200px;
       margin: auto;
+      padding: 20px;
     }
 
     h1 {
-      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    section {
+      margin-bottom: 30px;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 10px;
     }
 
     th,
     td {
       padding: 8px;
       border-bottom: 1px solid #ddd;
-      text-align: left;
     }
 
-    a {
-      color: #0366d6;
-      text-decoration: none;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-
-    .pagination {
-      text-align: center;
-      margin-top: 10px;
-    }
-
-    button {
-      margin: 0 3px;
-      padding: 5px 10px;
+    .pagination button {
+      margin: 2px;
     }
   </style>
 </head>
 
 <body>
-  <h1>Lingering PRs (No Updates ≥ 7 days)</h1>
-  <table id="prTable">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Title</th>
-        <th>Days Since Last Update</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-  <div class="pagination" id="pagination"></div>
+
+  <h1>Pull Request Health Dashboard</h1>
+
+  <section>
+    <h2>Response Time (hours)</h2>
+    <canvas id="responseChart"></canvas>
+  </section>
+
+  <section>
+    <h2>PR Throughput</h2>
+    <canvas id="throughputChart"></canvas>
+  </section>
+
+  <section>
+    <h2>Unassigned PRs</h2>
+    <div id="unassigned"></div>
+  </section>
+
+  <section>
+    <h2>Lingering PRs (no update ≥ 7 days)</h2>
+    <table id="lingerTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Title</th>
+          <th>Days Since Update</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div class="pagination" id="pager"></div>
+  </section>
+
   <script src="dashboard.js"></script>
 </body>
 

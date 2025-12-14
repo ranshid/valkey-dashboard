@@ -1,68 +1,65 @@
-#!/usr/bin/env python3
-# scripts/generate_dashboard.py
 from github import Github
 import os, json
 from datetime import datetime, timezone
 
-# Configuration
-STALE_DAYS = int(os.getenv("STALE_DAYS", "7"))  # threshold to call PR 'stale'
-OUT_PATH = "docs/data.json"
+OUT = "docs/data.json"
 
-def iso_now():
-    return datetime.now(timezone.utc).isoformat()
+def iso(dt):
+    return dt.isoformat() if dt else None
 
 def main():
     token = os.getenv("GITHUB_TOKEN")
     repo_full = os.getenv("GITHUB_REPOSITORY")
     if not token or not repo_full:
-        raise SystemExit("GITHUB_TOKEN and GITHUB_REPOSITORY must be set in environment.")
+        raise SystemExit("GITHUB_TOKEN and GITHUB_REPOSITORY required")
 
     gh = Github(token)
     repo = gh.get_repo(repo_full)
+    pulls = repo.get_pulls(state="all")
 
-    pulls = list(repo.get_pulls(state="open", sort="created", direction="asc"))
-    now = datetime.now(timezone.utc)
-    stale = []
-    response_hours = []
-
-    for pr in pulls:
-        # Use last updated time as proxy for responsiveness (includes comments, commits, reviews)
-        last_updated = pr.updated_at.replace(tzinfo=timezone.utc)
-        created = pr.created_at.replace(tzinfo=timezone.utc)
-
-        hours_since_update = (now - last_updated).total_seconds() / 3600.0
-        days_open = (now - created).days
-
-        pr_info = {
-            "number": pr.number,
-            "title": pr.title,
-            "html_url": pr.html_url,
-            "created_at": created.isoformat(),
-            "last_updated_at": last_updated.isoformat(),
-            "days_open": days_open,
-            "last_updated_hours": round(hours_since_update, 1)
-        }
-        response_hours.append(hours_since_update)
-        if days_open >= STALE_DAYS:
-            stale.append(pr_info)
-
-    mean_response = round(sum(response_hours)/len(response_hours), 2) if response_hours else None
-
-    output = {
+    data = {
         "repo": repo_full,
-        "generated_at": iso_now(),
-        "total_open_prs": len(pulls),
-        "mean_response_hours": mean_response,
-        "stale_threshold_days": STALE_DAYS,
-        "stale_prs": sorted(stale, key=lambda p: p["days_open"], reverse=True)
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "pull_requests": []
     }
 
-    os.makedirs(os.path.dirname(OUT_PATH), exist_ok=True)
-    with open(OUT_PATH, "w", encoding="utf-8") as f:
-        json.dump(output, f, indent=2)
+    for pr in pulls:
+        pr_data = {
+            "number": pr.number,
+            "title": pr.title,
+            "author": pr.user.login,
+            "created_at": iso(pr.created_at),
+            "updated_at": iso(pr.updated_at),
+            "closed_at": iso(pr.closed_at),
+            "merged": pr.is_merged(),
+            "html_url": pr.html_url,
+            "review_requests": [r.login for r in pr.get_review_requests()[0]],
+            "events": []
+        }
 
-    print("Wrote", OUT_PATH)
+        # Issue comments
+        for c in pr.get_issue_comments():
+            pr_data["events"].append({
+                "type": "comment",
+                "author": c.user.login,
+                "created_at": iso(c.created_at)
+            })
+
+        # Reviews
+        for r in pr.get_reviews():
+            pr_data["events"].append({
+                "type": "review",
+                "author": r.user.login,
+                "state": r.state,
+                "created_at": iso(r.submitted_at)
+            })
+
+        data["pull_requests"].append(pr_data)
+
+    with open(OUT, "w") as f:
+        json.dump(data, f, indent=2)
+
+    print(f"Wrote {OUT}")
 
 if __name__ == "__main__":
     main()
-
