@@ -40,7 +40,7 @@ jobs:
         run: python scripts/compute_data_metrics.py
 
       - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v1
         with:
-          branch: gh-pages   # branch to deploy
-          folder: docs       # folder to publish
+          token: ${{ secrets.PAT_TOKEN }}
+          branch: gh-pages
+          folder: docs
