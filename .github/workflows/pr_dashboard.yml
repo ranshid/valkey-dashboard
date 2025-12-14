@@ -40,11 +40,9 @@ jobs:
 
       # 5️⃣ Compute metrics (write metrics.json to docs/)
       - name: Compute metrics
-        run: python scripts/compute_data_metrics.py
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          METRICS_PATH: docs/metrics.json   # ensure metrics.json is written inside docs/
+        run: |
+          echo "Skipping compute_data_metrics.py due to API rate limits."
+          echo "Using local metrics.json."
 
       # 6️⃣ Upload docs/ folder as artifact
       - name: Upload site artifact
