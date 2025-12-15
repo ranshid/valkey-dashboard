@@ -1,49 +1,43 @@
 name: Generate and Deploy Dashboard
 
 on:
+  push:
+    branches:
+      - main  # only trigger on commits to main
   workflow_dispatch:
-  schedule:
-    - cron: "0 0 * * *"  # daily at midnight UTC
 
-# Permissions needed for Pages deployment
 permissions:
-  contents: read        # allow reading repo files
-  pages: write          # allow creating/updating GitHub Pages deployment
-  id-token: write       # required for deploy-pages action
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
-      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # 2️⃣ Set up Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      # 3️⃣ Install dependencies
       - name: Install dependencies
         run: pip install PyGithub pandas python-dateutil
 
-      # 4️⃣ Skip PR generation (API limits)
-      - name: Skip generating PR data
+      - name: Generate dashboard & metrics
         run: |
-          echo "Skipping generate_dashboard.py due to API rate limits."
-          echo "Using local data.json."
-
-      # 5️⃣ Compute metrics (write metrics.json to docs/)
-      - name: Compute metrics
-        env:
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-        run: |
-          # compute metrics
           python scripts/compute_data_metrics.py
-          
 
+      - name: Deploy to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v5
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          publish_branch: gh-pages
+          user_name: github-actions[bot]
+          user_email: 41898282+github-actions[bot]@users.noreply.github.com
+          commit_message: "Deploy dashboard [skip ci]"
