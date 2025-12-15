@@ -3,7 +3,7 @@ name: Generate and Deploy Dashboard
 on:
   push:
     branches:
-      - main  # only trigger on commits to main
+      - main
   workflow_dispatch:
 
 permissions:
@@ -12,8 +12,9 @@ permissions:
   id-token: write
 
 jobs:
-  build-and-deploy:
+  build-dashboard:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -26,18 +27,12 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install PyGithub pandas python-dateutil
+        run: pip install PyGithub pandas python-dateutil numpy
 
-      - name: Generate dashboard & metrics
-        run: |
-          python scripts/compute_data_metrics.py
+      - name: Compute metrics
+        run: python scripts/compute_data_metrics.py
 
-      - name: Deploy to gh-pages branch
-        uses: peaceiris/actions-gh-pages@v5
+      - name: Upload Pages artifact
+        uses: actions/upload-artifact@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
-          publish_branch: gh-pages
-          user_name: github-actions[bot]
-          user_email: 41898282+github-actions[bot]@users.noreply.github.com
-          commit_message: "Deploy dashboard [skip ci]"
+          path: docs
