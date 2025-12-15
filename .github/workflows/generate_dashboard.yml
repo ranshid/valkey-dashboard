@@ -6,10 +6,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-dashboard:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages 
     permissions:
       contents: read
+      pages: write
+      id-token: write 
 
     steps:
       - name: Checkout repo
@@ -24,12 +28,23 @@ jobs:
         run: pip install pandas python-dateutil PyGithub
 
       - name: Generate metrics and dashboard
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET_REPOSITORY: ${{ github.repository }}
         run: |
           python scripts/compute_data_metrics.py
-          python scripts/generate_dashboard.py
+        #  python scripts/generate_dashboard.py
 
       - name: Upload dashboard artifact
         uses: actions/upload-artifact@v4
         with:
           name: dashboard
-          path: docs/
+          path: |
+            docs/index.html
+            docs/metrics.json              
+            docs/assets/*
+
+      #- name: Deploy to GitHub Pages
+      #  uses: actions/deploy-pages@v4
+      #  with:
+      #    artifact_name: dashboard
