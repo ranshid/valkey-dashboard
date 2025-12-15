@@ -45,15 +45,5 @@ jobs:
         run: |
           # compute metrics
           python scripts/compute_data_metrics.py
-
-      # 6️⃣ Upload docs/ folder as artifact
-      - name: Upload site artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: github-pages
-          path: docs
-
-      # 7️⃣ Deploy to GitHub Pages
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v1
+          
 
