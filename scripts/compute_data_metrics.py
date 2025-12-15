@@ -54,48 +54,52 @@ for pr in pr_list:
         closed_weeks[w] += 1
         all_week_dates.append(week_to_date(w))
 
-# -------- Metric 4: PR staleness (hours) --------
+# -------- Metric 4: PR staleness (hours), distributed across weeks --------
 stale_weekly = defaultdict(list)
 stale_times_hours = []
 
 for pr in pr_list:
-    events = sorted(
-        [e for e in pr.get("events", []) if e.get("created_at")],
-        key=lambda e: parse_date(e["created_at"])
-    )
+    # Include creation as first event
+    events = []
+    if pr.get("created_at"):
+        events.append({"created_at": pr["created_at"]})
+    events += [e for e in pr.get("events", []) if e.get("created_at")]
+    events = sorted(events, key=lambda e: parse_date(e["created_at"]))
 
     for i in range(1, len(events)):
-        delta_hours = (
-            parse_date(events[i]["created_at"]) -
-            parse_date(events[i-1]["created_at"])
-        ).total_seconds() / 3600
-
+        start_dt = parse_date(events[i-1]["created_at"])
+        end_dt = parse_date(events[i]["created_at"])
+        delta_hours = (end_dt - start_dt).total_seconds() / 3600
         stale_times_hours.append(delta_hours)
-        w = week_bucket(events[i]["created_at"])
-        stale_weekly[w].append(delta_hours)
-        all_week_dates.append(week_to_date(w))
+
+        # Split delta across all weeks spanned
+        current_dt = start_dt
+        while current_dt < end_dt:
+            week_label = date_to_week(current_dt)
+            # End of this ISO week
+            week_end = current_dt + timedelta(days=7 - current_dt.weekday())
+            segment_end = min(week_end, end_dt)
+            segment_hours = (segment_end - start_dt).total_seconds() / 3600
+            stale_weekly[week_label].append(segment_hours)
+            all_week_dates.append(current_dt)
+            current_dt = segment_end
 
 stale_weekly_metrics = {}
 for week, values in stale_weekly.items():
     stale_weekly_metrics[week] = {
         "p50": float(np.percentile(values, 50)),
-        "p99": float(np.percentile(values, 99)),
+        "p90": float(np.percentile(values, 90)),
         "p100": float(np.max(values))
     }
 
 # -------- Metric 5: PR response time (hours) --------
 response_weekly = defaultdict(list)
-response_times_hours = []
 
 for pr in pr_list:
     valid_events = [e for e in pr.get("events", []) if e.get("created_at")]
     if valid_events and pr.get("created_at"):
         first_event_time = min(parse_date(e["created_at"]) for e in valid_events)
-        delta_hours = (
-            first_event_time - parse_date(pr["created_at"])
-        ).total_seconds() / 3600
-
-        response_times_hours.append(delta_hours)
+        delta_hours = (first_event_time - parse_date(pr["created_at"])).total_seconds() / 3600
         w = week_bucket(pr["created_at"])
         response_weekly[w].append(delta_hours)
         all_week_dates.append(week_to_date(w))
@@ -104,15 +108,12 @@ response_weekly_metrics = {}
 for week, values in response_weekly.items():
     response_weekly_metrics[week] = {
         "p50": float(np.percentile(values, 50)),
-        "p99": float(np.percentile(values, 99)),
+        "p90": float(np.percentile(values, 90)),
         "p100": float(np.max(values))
     }
 
 # -------- Metric 6: Weekly Open PRs (P100) --------
-# We'll bucket each PR by week from its created_at until closed_at (or now if still open)
 weekly_open_counts = defaultdict(int)
-
-# Collect all weeks in the data
 all_weeks_set = set()
 
 for pr in pr_list:
@@ -121,18 +122,63 @@ for pr in pr_list:
     created_dt = parse_date(pr["created_at"])
     closed_dt = parse_date(pr["closed_at"]) if pr.get("closed_at") else now
 
-    # Iterate weeks between created and closed (or now)
     current_dt = created_dt
     while current_dt <= closed_dt:
-        week = week_bucket(current_dt.isoformat())
+        week = date_to_week(current_dt)
         weekly_open_counts[week] += 1
         all_weeks_set.add(week)
-        # Move to next week
         current_dt += timedelta(days=7)
 
-# Ensure zero entries for missing weeks
 all_weeks = sorted(all_weeks_set)
 weekly_open_counts_full = {week: weekly_open_counts.get(week, 0) for week in all_weeks}
+
+# -------- Metric 7: First Interaction Staleness (weekly snapshot) --------
+first_interaction_staleness_weekly = defaultdict(list)
+
+for pr in pr_list:
+    if not pr.get("created_at"):
+        continue
+
+    created_dt = parse_date(pr["created_at"])
+
+    # Find first review event (if any)
+    review_events = [
+        e for e in pr.get("events", [])
+        if e.get("created_at") and e.get("type") == "review"
+    ]
+
+    first_review_dt = (
+        min(parse_date(e["created_at"]) for e in review_events)
+        if review_events else None
+    )
+
+    # PR contributes until first review or now
+    end_dt = first_review_dt if first_review_dt else now
+
+    # Walk week by week
+    current_week_start = week_to_date(date_to_week(created_dt))
+    while current_week_start <= end_dt:
+        week_end = min(
+            current_week_start + timedelta(days=7),
+            end_dt
+        )
+
+        # staleness = how long PR has existed by end of this week
+        staleness_hours = (week_end - created_dt).total_seconds() / 3600
+
+        week_label = date_to_week(current_week_start)
+        first_interaction_staleness_weekly[week_label].append(staleness_hours)
+        all_week_dates.append(current_week_start)
+
+        current_week_start += timedelta(weeks=1)
+
+first_interaction_staleness_weekly_metrics = {}
+for week, values in first_interaction_staleness_weekly.items():
+    first_interaction_staleness_weekly_metrics[week] = {
+        "p50": float(np.percentile(values, 50)),
+        "p90": float(np.percentile(values, 90)),
+        "p100": float(np.max(values))
+    }
 
 # -------- Fill missing weeks with zeros --------
 if all_week_dates:
@@ -145,9 +191,11 @@ if all_week_dates:
 
         created_weeks.setdefault(w, 0)
         closed_weeks.setdefault(w, 0)
+        weekly_open_counts_full.setdefault(w, 0)
 
-        stale_weekly_metrics.setdefault(w, {"p50": 0, "p99": 0, "p100": 0})
-        response_weekly_metrics.setdefault(w, {"p50": 0, "p99": 0, "p100": 0})
+        stale_weekly_metrics.setdefault(w, {"p50": 0, "p90": 0, "p100": 0})
+        response_weekly_metrics.setdefault(w, {"p50": 0, "p90": 0, "p100": 0})
+        first_interaction_staleness_weekly_metrics.setdefault(w, {"p50": 0, "p90": 0, "p100": 0})
 
         current += timedelta(weeks=1)
 
@@ -156,11 +204,7 @@ top_stale_prs = []
 
 for pr in open_prs:
     events = [e for e in pr.get("events", []) if e.get("created_at")]
-    last_event_time = (
-        max(parse_date(e["created_at"]) for e in events)
-        if events else parse_date(pr["created_at"])
-    )
-
+    last_event_time = max(parse_date(e["created_at"]) for e in events) if events else parse_date(pr["created_at"])
     delta_hours = (now - last_event_time).total_seconds() / 3600
 
     author_field = pr.get("author")
@@ -168,10 +212,7 @@ for pr in open_prs:
 
     reviewers = []
     if pr.get("review_requests"):
-        reviewers = [
-            r if isinstance(r, str) else r.get("login")
-            for r in pr["review_requests"]
-        ]
+        reviewers = [r if isinstance(r, str) else r.get("login") for r in pr["review_requests"]]
 
     top_stale_prs.append({
         "number": pr["number"],
@@ -197,8 +238,8 @@ metrics = {
     "weekly_open_prs": weekly_open_counts_full,
     "stale_times_hours": stale_times_hours,
     "stale_weekly_metrics": dict(sorted(stale_weekly_metrics.items())),
-    "response_times_hours": response_times_hours,
     "response_weekly_metrics": dict(sorted(response_weekly_metrics.items())),
+    "first_interaction_weekly_metrics": dict(sorted(first_interaction_staleness_weekly_metrics.items())),
     "top_stale_prs": top_stale_prs
 }
 

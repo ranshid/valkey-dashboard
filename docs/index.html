@@ -47,6 +47,9 @@
     <canvas id="stalenessChart"></canvas>
   </div>
   <div class="chart-container">
+    <canvas id="firstInteractionChart"></canvas>
+  </div>
+  <div class="chart-container">
     <canvas id="responseChart"></canvas>
   </div>
   <h2>Top Stale PRs</h2>
@@ -155,10 +158,10 @@
         options: { responsive: true, plugins: { legend: { position: 'top' } } }
       });
 
-      // Staleness P50, P99, P100
+      // Staleness P50, P90, P100
       const staleLabels = Object.keys(metrics.stale_weekly_metrics).sort();
       const p50 = staleLabels.map(w => metrics.stale_weekly_metrics[w].p50);
-      const p99 = staleLabels.map(w => metrics.stale_weekly_metrics[w].p99);
+      const p90 = staleLabels.map(w => metrics.stale_weekly_metrics[w].p90);
       const p100 = staleLabels.map(w => metrics.stale_weekly_metrics[w].p100);
 
       plotWeeklyChart(
@@ -166,16 +169,45 @@
         staleLabels,
         [
           { label: 'P50', data: p50, borderColor: 'green', fill: false },
-          { label: 'P99', data: p99, borderColor: 'red', fill: false },
+          { label: 'P90', data: p90, borderColor: 'red', fill: false },
           { label: 'P100', data: p100, borderColor: 'black', fill: false }
         ],
         'PR Staleness (hours) per Week'
       );
 
-      // Response time P50, P99, P100
+      const firstInteractionWeekly = metrics.first_interaction_weekly_metrics || {};
+      const firstWeeks = Object.keys(firstInteractionWeekly).sort();
+      const p50Values = firstWeeks.map(week => firstInteractionWeekly[week].p50);
+      const p90Values = firstWeeks.map(week => firstInteractionWeekly[week].p90);
+      const p100Values = firstWeeks.map(week => firstInteractionWeekly[week].p100);
+
+      new Chart(document.getElementById('firstInteractionChart').getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: firstWeeks,
+          datasets: [
+            { label: 'P50 (hours)', data: p50Values, borderColor: 'blue', fill: false },
+            { label: 'P90 (hours)', data: p90Values, borderColor: 'orange', fill: false },
+            { label: 'P100 (hours)', data: p100Values, borderColor: 'red', fill: false }
+          ]
+        },
+        options: {
+          responsive: true, plugins: {
+            legend: { position: 'top' },
+            title: {
+              display: true,       // show the title
+              text: 'PR First Interaction Time (Weekly)', // your title
+              font: { size: 18 },  // optional: font size
+              padding: { top: 10, bottom: 20 }
+            }
+          }
+        }
+      });
+
+      // Response time P50, P90, P100
       const respLabels = Object.keys(metrics.response_weekly_metrics).sort();
       const r50 = respLabels.map(w => metrics.response_weekly_metrics[w].p50);
-      const r99 = respLabels.map(w => metrics.response_weekly_metrics[w].p99);
+      const r99 = respLabels.map(w => metrics.response_weekly_metrics[w].p90);
       const r100 = respLabels.map(w => metrics.response_weekly_metrics[w].p100);
 
       plotWeeklyChart(
@@ -183,7 +215,7 @@
         respLabels,
         [
           { label: 'P50', data: r50, borderColor: 'green', fill: false },
-          { label: 'P99', data: r99, borderColor: 'red', fill: false },
+          { label: 'P90', data: r99, borderColor: 'red', fill: false },
           { label: 'P100', data: r100, borderColor: 'black', fill: false }
         ],
         'PR Response Time (hours) per Week'
