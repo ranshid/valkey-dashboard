@@ -41,7 +41,7 @@
     <canvas id="prCreationChart"></canvas>
   </div>
   <div class="chart-container">
-    <canvas id="prClosedChart"></canvas>
+    <canvas id="weeklyOpenChart"></canvas>
   </div>
   <div class="chart-container">
     <canvas id="stalenessChart"></canvas>
@@ -119,21 +119,41 @@
 
       // PR Creation
       const creation = prepareLabelsAndData(metrics.pr_creation_weekly);
+      const closed = prepareLabelsAndData(metrics.pr_close_weekly);
+      const delta = creation.values.map((val, i) => val - (closed.values[i] || 0));
+
       plotWeeklyChart(
         document.getElementById('prCreationChart').getContext('2d'),
         creation.labels,
-        [{ label: 'PRs Created', data: creation.values, borderColor: 'blue', fill: false }],
+        [{ label: 'PRs Created', data: creation.values, borderColor: 'rgba(54, 162, 235, 0.2)', backgroundColor: 'rgba(54, 162, 235, 0.1)', fill: false, borderWidth: 2, ointRadius: 3 },
+        { label: 'PRs Closed', data: closed.values, borderColor: 'rgba(34, 197, 94, 0.2)', backgroundColor: 'rgba(34, 197, 94, 0.1)', fill: false, borderWidth: 2, ointRadius: 3 },
+        { label: 'PRs Delta', data: delta, borderColor: 'orange', fill: false }
+        ],
         'PR Creation per Week'
       );
 
-      // PR Closed
-      const closed = prepareLabelsAndData(metrics.pr_close_weekly);
-      plotWeeklyChart(
-        document.getElementById('prClosedChart').getContext('2d'),
-        closed.labels,
-        [{ label: 'PRs Closed', data: closed.values, borderColor: 'orange', fill: false }],
-        'PR Closed per Week'
-      );
+      const weeklyOpenData = metrics.weekly_open_prs || {};
+      const openLabels = Object.keys(weeklyOpenData).sort();
+      const openValues = openLabels.map(week => weeklyOpenData[week]);
+
+      new Chart(document.getElementById('weeklyOpenChart').getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: openLabels,
+          datasets: [
+            {
+              label: 'Total Open PRs',
+              data: openValues,
+              borderColor: 'rgba(0, 128, 0, 0.5)',
+              backgroundColor: 'rgba(0, 128, 0, 0.2)',
+              borderWidth: 2,
+              fill: false,
+              pointRadius: 3
+            }
+          ]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'top' } } }
+      });
 
       // Staleness P50, P99, P100
       const staleLabels = Object.keys(metrics.stale_weekly_metrics).sort();
