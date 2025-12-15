@@ -1,0 +1,29 @@
+name: Deploy GitHub Pages
+
+on:
+  workflow_run:
+    workflows: ["Generate Dashboard"]
+    types:
+      - completed
+
+jobs:
+  deploy-pages:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Download dashboard artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dashboard
+          path: docs/
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
+        with:
+          branch: gh-pages
+          folder: docs
