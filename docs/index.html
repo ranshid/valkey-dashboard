@@ -68,12 +68,68 @@
     <tbody></tbody>
   </table>
 
+  <div class="pagination">
+    <button id="prevPage">Prev</button>
+    <span id="pageInfo"></span>
+    <button id="nextPage">Next</button>
+  </div>
+
   <script>
     async function fetchMetrics() {
       const res = await fetch('metrics.json');
       const data = await res.json();
       return data;
     }
+
+    // ---------- Pagination logic ----------
+    const PAGE_SIZE = 10;
+    let currentPage = 1;
+    let allStalePRs = [];
+
+    function renderStaleTablePage() {
+      const tbody = document.querySelector('#topStalePRs tbody');
+      tbody.innerHTML = '';
+
+      const start = (currentPage - 1) * PAGE_SIZE;
+      const end = start + PAGE_SIZE;
+      const pageItems = allStalePRs.slice(start, end);
+
+      for (const pr of pageItems) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><a href="${pr.url}" target="_blank">#${pr.number}</a></td>
+          <td>${pr.title || ''}</td>
+          <td>${pr.author || ''}</td>
+          <td>${(pr.reviewers || []).join(', ')}</td>
+          <td>${pr.created_at}</td>
+          <td>${pr.last_event_at}</td>
+          <td>${pr.stale_hours.toFixed(1)}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+
+      const totalPages = Math.ceil(allStalePRs.length / PAGE_SIZE);
+      document.getElementById('pageInfo').textContent =
+        `Page ${currentPage} of ${totalPages}`;
+
+      document.getElementById('prevPage').disabled = currentPage === 1;
+      document.getElementById('nextPage').disabled = currentPage === totalPages;
+    }
+
+    document.getElementById('prevPage').onclick = () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderStaleTablePage();
+      }
+    };
+
+    document.getElementById('nextPage').onclick = () => {
+      const totalPages = Math.ceil(allStalePRs.length / PAGE_SIZE);
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderStaleTablePage();
+      }
+    };
 
     function plotWeeklyChart(ctx, labels, datasets, title) {
       new Chart(ctx, {
@@ -216,13 +272,14 @@
         [
           { label: 'P50', data: r50, borderColor: 'green', fill: false },
           { label: 'P90', data: r99, borderColor: 'red', fill: false },
-          { label: 'P100', data: r100, borderColor: 'black', fill: false }
+          //  { label: 'P100', data: r100, borderColor: 'black', fill: false } // remove P100 for now
         ],
         'PR Response Time (hours) per Week'
       );
 
-      // Top Stale PRs
-      populateTopStaleTable(metrics.top_stale_prs);
+      // Top stale PRs (paginated)
+      allStalePRs = metrics.top_stale_prs || [];
+      renderStaleTablePage();
     })();
   </script>
 </body>

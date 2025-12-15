@@ -199,33 +199,60 @@ if all_week_dates:
 
         current += timedelta(weeks=1)
 
-# -------- Top N most stale PRs --------
-top_stale_prs = []
+# -------- Top stale PRs: no review since creation --------
+STALE_DAYS_THRESHOLD = 30
+STALE_HOURS_THRESHOLD = STALE_DAYS_THRESHOLD * 24
+
+stale_prs = []
 
 for pr in open_prs:
-    events = [e for e in pr.get("events", []) if e.get("created_at")]
-    last_event_time = max(parse_date(e["created_at"]) for e in events) if events else parse_date(pr["created_at"])
-    delta_hours = (now - last_event_time).total_seconds() / 3600
+    if not pr.get("created_at"):
+        continue
 
+    created_dt = parse_date(pr["created_at"])
+
+    # Find first REVIEW event only
+    review_events = [
+        e for e in pr.get("events", [])
+        if e.get("created_at") and e.get("type") == "review"
+    ]
+
+    # Skip PRs that already received a review
+    if review_events:
+        continue
+
+    # Staleness = now - creation time
+    delta_hours = (now - created_dt).total_seconds() / 3600
+
+    # Only include PRs stale more than threshold
+    if delta_hours < STALE_HOURS_THRESHOLD:
+        continue
+
+    # Author
     author_field = pr.get("author")
     author = author_field.get("login") if isinstance(author_field, dict) else author_field
 
+    # Reviewers
     reviewers = []
     if pr.get("review_requests"):
-        reviewers = [r if isinstance(r, str) else r.get("login") for r in pr["review_requests"]]
+        reviewers = [
+            r if isinstance(r, str) else r.get("login")
+            for r in pr["review_requests"]
+        ]
 
-    top_stale_prs.append({
+    stale_prs.append({
         "number": pr["number"],
         "title": pr.get("title"),
         "author": author,
         "reviewers": reviewers,
         "created_at": pr.get("created_at"),
-        "last_event_at": last_event_time.isoformat(),
-        "stale_hours": delta_hours,
+        "stale_hours": round(delta_hours, 2),
+        "stale_days": round(delta_hours / 24, 1),
         "url": f"https://github.com/{data['repo']}/pull/{pr['number']}"
     })
 
-top_stale_prs = sorted(top_stale_prs, key=lambda x: x["stale_hours"], reverse=True)[:TOP_STALE]
+# Sort descending by staleness
+top_stale_prs = sorted(stale_prs, key=lambda x: x["stale_hours"], reverse=True)
 
 # -------- Build metrics dictionary --------
 metrics = {

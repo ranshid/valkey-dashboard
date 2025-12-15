@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-12-15T13:35:55.665514+00:00",
+  "generated_at": "2025-12-15T13:52:11.555945+00:00",
   "repo": "valkey-io/valkey",
   "open_prs_count": 161,
   "unassigned_prs_count": 114,
@@ -283,7 +283,7 @@
     "2025-W48": 173,
     "2025-W49": 172,
     "2025-W50": 168,
-    "2025-W51": 15
+    "2025-W51": 16
   },
   "stale_times_hours": [
     0.05583333333333333,
@@ -19466,123 +19466,384 @@
       "p100": 15189.058888888889
     },
     "2025-W51": {
-      "p50": 6382.949629309444,
-      "p90": 14742.786740420555,
-      "p100": 15202.657684865
+      "p50": 6383.220709984723,
+      "p90": 14743.057821095834,
+      "p100": 15202.928765540279
     }
   },
   "top_stale_prs": [
     {
-      "number": 405,
-      "title": "add user-client mapping.",
-      "author": "Shuen14",
+      "number": 1455,
+      "title": "Add GETPXT, MGETPXT (Get with millisecond expiration) commands",
+      "author": "arcivanov",
       "reviewers": [],
-      "created_at": "2024-04-30T02:15:34Z",
-      "last_event_at": "2024-04-30T13:25:33+00:00",
-      "stale_hours": 14256.172962642777,
-      "url": "https://github.com/valkey-io/valkey/pull/405"
+      "created_at": "2024-12-18T02:17:14Z",
+      "stale_hours": 8699.58,
+      "stale_days": 362.5,
+      "url": "https://github.com/valkey-io/valkey/pull/1455"
     },
     {
-      "number": 363,
-      "title": "Add support for compiling with mimalloc ",
-      "author": "WM0323",
-      "reviewers": [
-        "PingXie"
-      ],
-      "created_at": "2024-04-24T16:18:08Z",
-      "last_event_at": "2024-05-02T18:24:54+00:00",
-      "stale_hours": 14203.18379597611,
-      "url": "https://github.com/valkey-io/valkey/pull/363"
+      "number": 1547,
+      "title": "feat: stats and keyspace notifications about lazy expiration",
+      "author": "proost",
+      "reviewers": [],
+      "created_at": "2025-01-12T08:59:55Z",
+      "stale_hours": 8092.87,
+      "stale_days": 337.2,
+      "url": "https://github.com/valkey-io/valkey/pull/1547"
     },
     {
-      "number": 449,
-      "title": "Batch applying events to kqueue",
-      "author": "panjf2000",
-      "reviewers": [
-        "madolson",
-        "PingXie"
-      ],
-      "created_at": "2024-05-07T04:11:28Z",
-      "last_event_at": "2024-05-31T17:24:53+00:00",
-      "stale_hours": 13508.18407375389,
-      "url": "https://github.com/valkey-io/valkey/pull/449"
+      "number": 1689,
+      "title": "Implementation of CPU throttling",
+      "author": "lschmidtcavalcante-sc",
+      "reviewers": [],
+      "created_at": "2025-02-07T20:42:28Z",
+      "stale_hours": 7457.16,
+      "stale_days": 310.7,
+      "url": "https://github.com/valkey-io/valkey/pull/1689"
     },
     {
-      "number": 549,
-      "title": "Add util tag in unit-test name of util to be consistent with other tests and rename tempfile name to valkey-recliam-cache-test",
-      "author": "Shivshankar-Reddy",
-      "reviewers": [
-        "madolson"
-      ],
-      "created_at": "2024-05-24T18:32:48Z",
-      "last_event_at": "2024-05-31T20:29:11+00:00",
-      "stale_hours": 13505.112407087223,
-      "url": "https://github.com/valkey-io/valkey/pull/549"
-    },
-    {
-      "number": 618,
-      "title": "Module API: Add push reply",
+      "number": 1726,
+      "title": "Increase max robj embedded key + value to 128 bytes",
       "author": "zuiderkwast",
-      "reviewers": [],
-      "created_at": "2024-06-10T09:51:33Z",
-      "last_event_at": "2024-06-19T04:51:53+00:00",
-      "stale_hours": 13064.734073753889,
-      "url": "https://github.com/valkey-io/valkey/pull/618"
+      "reviewers": [
+        "rainsupreme"
+      ],
+      "created_at": "2025-02-13T18:14:20Z",
+      "stale_hours": 7315.63,
+      "stale_days": 304.8,
+      "url": "https://github.com/valkey-io/valkey/pull/1726"
     },
     {
-      "number": 599,
-      "title": "Use io_uring to make fsync asynchronous when set appendfsync to always to make CPU more efficient.",
-      "author": "zhulipeng",
+      "number": 1791,
+      "title": "feat: json log format",
+      "author": "jbergstroem",
+      "reviewers": [],
+      "created_at": "2025-02-27T09:52:41Z",
+      "stale_hours": 6987.99,
+      "stale_days": 291.2,
+      "url": "https://github.com/valkey-io/valkey/pull/1791"
+    },
+    {
+      "number": 1898,
+      "title": "Support custom workflow benchmark",
+      "author": "artikell",
+      "reviewers": [],
+      "created_at": "2025-03-28T16:11:18Z",
+      "stale_hours": 6285.68,
+      "stale_days": 261.9,
+      "url": "https://github.com/valkey-io/valkey/pull/1898"
+    },
+    {
+      "number": 1909,
+      "title": "Add cluster-non-random-gosip option",
+      "author": "VyacheslavVanin",
+      "reviewers": [],
+      "created_at": "2025-04-02T07:27:09Z",
+      "stale_hours": 6174.42,
+      "stale_days": 257.3,
+      "url": "https://github.com/valkey-io/valkey/pull/1909"
+    },
+    {
+      "number": 1964,
+      "title": "Add sentinel failover SAFE option",
+      "author": "li-benson",
       "reviewers": [
         "hwware"
       ],
-      "created_at": "2024-06-04T09:13:58Z",
-      "last_event_at": "2024-07-09T00:10:07+00:00",
-      "stale_hours": 12589.430184865,
-      "url": "https://github.com/valkey-io/valkey/pull/599"
+      "created_at": "2025-04-16T12:56:30Z",
+      "stale_hours": 5832.93,
+      "stale_days": 243.0,
+      "url": "https://github.com/valkey-io/valkey/pull/1964"
     },
     {
-      "number": 690,
-      "title": "Refactor debug configuration options for clarity and consistency",
-      "author": "PingXie",
+      "number": 1967,
+      "title": "[New Feature]INFO KEYSIZES section",
+      "author": "hwware",
       "reviewers": [],
-      "created_at": "2024-06-25T06:40:52Z",
-      "last_event_at": "2024-07-09T00:22:21+00:00",
-      "stale_hours": 12589.226295976112,
-      "url": "https://github.com/valkey-io/valkey/pull/690"
+      "created_at": "2025-04-17T15:26:05Z",
+      "stale_hours": 5806.44,
+      "stale_days": 241.9,
+      "url": "https://github.com/valkey-io/valkey/pull/1967"
     },
     {
-      "number": 906,
-      "title": "Keep the log fd, don't re-open logfile in every logs",
+      "number": 2127,
+      "title": "Slot-level memory metrics POC",
+      "author": "hwware",
+      "reviewers": [],
+      "created_at": "2025-05-23T15:20:19Z",
+      "stale_hours": 4942.53,
+      "stale_days": 205.9,
+      "url": "https://github.com/valkey-io/valkey/pull/2127"
+    },
+    {
+      "number": 2136,
+      "title": "Hash TTL tests - [don't review]",
+      "author": "xbasel",
+      "reviewers": [],
+      "created_at": "2025-05-25T07:24:29Z",
+      "stale_hours": 4902.46,
+      "stale_days": 204.3,
+      "url": "https://github.com/valkey-io/valkey/pull/2136"
+    },
+    {
+      "number": 2180,
+      "title": "Hash prefetching",
+      "author": "xbasel",
+      "reviewers": [],
+      "created_at": "2025-06-06T11:56:56Z",
+      "stale_hours": 4609.92,
+      "stale_days": 192.1,
+      "url": "https://github.com/valkey-io/valkey/pull/2180"
+    },
+    {
+      "number": 2185,
+      "title": "Achieve build success on WINDOWS",
+      "author": "SamuelMarks",
+      "reviewers": [],
+      "created_at": "2025-06-07T22:55:42Z",
+      "stale_hours": 4574.94,
+      "stale_days": 190.6,
+      "url": "https://github.com/valkey-io/valkey/pull/2185"
+    },
+    {
+      "number": 2221,
+      "title": "fix: incomplete printing of the buffer content when a protocol error occurs (#2218)",
+      "author": "wstar05",
+      "reviewers": [],
+      "created_at": "2025-06-16T09:00:33Z",
+      "stale_hours": 4372.86,
+      "stale_days": 182.2,
+      "url": "https://github.com/valkey-io/valkey/pull/2221"
+    },
+    {
+      "number": 2238,
+      "title": "spelling: ; otherwise,",
+      "author": "jsoref",
+      "reviewers": [],
+      "created_at": "2025-06-20T21:12:11Z",
+      "stale_hours": 4264.67,
+      "stale_days": 177.7,
+      "url": "https://github.com/valkey-io/valkey/pull/2238"
+    },
+    {
+      "number": 2275,
+      "title": "Add keyspace-hits and keyspace-misses metrics under CLUSTER SLOT-STATS command",
       "author": "enjoy-binbin",
+      "reviewers": [],
+      "created_at": "2025-06-26T04:26:56Z",
+      "stale_hours": 4137.42,
+      "stale_days": 172.4,
+      "url": "https://github.com/valkey-io/valkey/pull/2275"
+    },
+    {
+      "number": 2306,
+      "title": "Unexpected variable overriding from .make-settings file",
+      "author": "yzc-yzc",
+      "reviewers": [],
+      "created_at": "2025-07-04T09:11:46Z",
+      "stale_hours": 3940.67,
+      "stale_days": 164.2,
+      "url": "https://github.com/valkey-io/valkey/pull/2306"
+    },
+    {
+      "number": 2307,
+      "title": "[optimization] Optimization of Sentinel Configuration File Update Strategy",
+      "author": "youngmore1024",
+      "reviewers": [],
+      "created_at": "2025-07-04T09:28:19Z",
+      "stale_hours": 3940.4,
+      "stale_days": 164.2,
+      "url": "https://github.com/valkey-io/valkey/pull/2307"
+    },
+    {
+      "number": 2368,
+      "title": "add parameter for initiating bgrewriteaof on exceeding maximum AOF size",
+      "author": "kronwerk",
+      "reviewers": [],
+      "created_at": "2025-07-17T16:00:05Z",
+      "stale_hours": 3621.87,
+      "stale_days": 150.9,
+      "url": "https://github.com/valkey-io/valkey/pull/2368"
+    },
+    {
+      "number": 2420,
+      "title": "[NOT FOR MERGE] valkey-benchmark: add search support",
+      "author": "zvi-code",
+      "reviewers": [],
+      "created_at": "2025-08-04T07:00:29Z",
+      "stale_hours": 3198.86,
+      "stale_days": 133.3,
+      "url": "https://github.com/valkey-io/valkey/pull/2420"
+    },
+    {
+      "number": 2501,
+      "title": "Delete keys matching pattern",
+      "author": "satheeshaGowda",
+      "reviewers": [],
+      "created_at": "2025-08-17T23:53:15Z",
+      "stale_hours": 2869.98,
+      "stale_days": 119.6,
+      "url": "https://github.com/valkey-io/valkey/pull/2501"
+    },
+    {
+      "number": 2513,
+      "title": "Crash on divergence in view at cluster layer and replication layer for self",
+      "author": "hpatro",
+      "reviewers": [],
+      "created_at": "2025-08-19T22:49:57Z",
+      "stale_hours": 2823.04,
+      "stale_days": 117.6,
+      "url": "https://github.com/valkey-io/valkey/pull/2513"
+    },
+    {
+      "number": 2550,
+      "title": "Roll backward downgrade compatibility from Redis 7.0/7.2 and Valkey 7.2/8.0 to Redis 6.2",
+      "author": "satheeshaGowda",
+      "reviewers": [],
+      "created_at": "2025-08-26T23:21:00Z",
+      "stale_hours": 2654.52,
+      "stale_days": 110.6,
+      "url": "https://github.com/valkey-io/valkey/pull/2550"
+    },
+    {
+      "number": 2551,
+      "title": "Roll backward downgrade compatibility from Redis 7.2 and Valkey 7.2/8.0 to Redis 7.0",
+      "author": "satheeshaGowda",
+      "reviewers": [],
+      "created_at": "2025-08-26T23:40:18Z",
+      "stale_hours": 2654.2,
+      "stale_days": 110.6,
+      "url": "https://github.com/valkey-io/valkey/pull/2551"
+    },
+    {
+      "number": 2552,
+      "title": "Multi Threaded RDB Load",
+      "author": "Nicky-2000",
+      "reviewers": [],
+      "created_at": "2025-08-26T23:49:00Z",
+      "stale_hours": 2654.05,
+      "stale_days": 110.6,
+      "url": "https://github.com/valkey-io/valkey/pull/2552"
+    },
+    {
+      "number": 2576,
+      "title": "bio.c: Split thread function into smaller parts",
+      "author": "TedLyngmo",
+      "reviewers": [],
+      "created_at": "2025-09-03T17:33:43Z",
+      "stale_hours": 2468.31,
+      "stale_days": 102.8,
+      "url": "https://github.com/valkey-io/valkey/pull/2576"
+    },
+    {
+      "number": 2577,
+      "title": "bio.c: Split thread function into smaller parts v2",
+      "author": "TedLyngmo",
+      "reviewers": [],
+      "created_at": "2025-09-03T18:13:04Z",
+      "stale_hours": 2467.65,
+      "stale_days": 102.8,
+      "url": "https://github.com/valkey-io/valkey/pull/2577"
+    },
+    {
+      "number": 2609,
+      "title": "Defer slot migration failover until async modules are consistent",
+      "author": "murphyjacob4",
+      "reviewers": [],
+      "created_at": "2025-09-13T00:38:00Z",
+      "stale_hours": 2245.24,
+      "stale_days": 93.6,
+      "url": "https://github.com/valkey-io/valkey/pull/2609"
+    },
+    {
+      "number": 2627,
+      "title": "Skip AOF rewrite when a short write occurs",
+      "author": "chenyang8094",
+      "reviewers": [
+        "madolson",
+        "zuiderkwast"
+      ],
+      "created_at": "2025-09-19T08:06:46Z",
+      "stale_hours": 2093.76,
+      "stale_days": 87.2,
+      "url": "https://github.com/valkey-io/valkey/pull/2627"
+    },
+    {
+      "number": 2638,
+      "title": "Add atomic slot migration test to validate DB and slot stats",
+      "author": "murphyjacob4",
+      "reviewers": [],
+      "created_at": "2025-09-22T00:30:20Z",
+      "stale_hours": 2029.36,
+      "stale_days": 84.6,
+      "url": "https://github.com/valkey-io/valkey/pull/2638"
+    },
+    {
+      "number": 2650,
+      "title": "Automatic TLS Certificate Reload",
+      "author": "satheeshaGowda",
+      "reviewers": [],
+      "created_at": "2025-09-25T21:42:13Z",
+      "stale_hours": 1936.17,
+      "stale_days": 80.7,
+      "url": "https://github.com/valkey-io/valkey/pull/2650"
+    },
+    {
+      "number": 2664,
+      "title": "add_memalign_func",
+      "author": "luorong1999",
+      "reviewers": [],
+      "created_at": "2025-09-29T09:54:20Z",
+      "stale_hours": 1851.96,
+      "stale_days": 77.2,
+      "url": "https://github.com/valkey-io/valkey/pull/2664"
+    },
+    {
+      "number": 2689,
+      "title": "Fix #2678 don't add loadmodule when from config",
+      "author": "remicollet",
+      "reviewers": [
+        "rjd15372"
+      ],
+      "created_at": "2025-10-04T05:27:24Z",
+      "stale_hours": 1736.41,
+      "stale_days": 72.4,
+      "url": "https://github.com/valkey-io/valkey/pull/2689"
+    },
+    {
+      "number": 2790,
+      "title": "Optimize CRC16 using multi-byte LUT",
+      "author": "Cuda-Chen",
+      "reviewers": [],
+      "created_at": "2025-10-31T12:09:29Z",
+      "stale_hours": 1081.71,
+      "stale_days": 45.1,
+      "url": "https://github.com/valkey-io/valkey/pull/2790"
+    },
+    {
+      "number": 2795,
+      "title": "updated modules examples to compile on Valkey 7.2 branch",
+      "author": "dmitrypol",
+      "reviewers": [],
+      "created_at": "2025-11-02T19:29:11Z",
+      "stale_hours": 1026.38,
+      "stale_days": 42.8,
+      "url": "https://github.com/valkey-io/valkey/pull/2795"
+    },
+    {
+      "number": 2811,
+      "title": "Cluster: Fix sub-replica and prevent empty primary when replica is blocked at replication and has inbound/outbound link race",
+      "author": "zhijun42",
       "reviewers": [
         "PingXie",
-        "madolson"
+        "enjoy-binbin",
+        "hpatro"
       ],
-      "created_at": "2024-08-14T05:13:26Z",
-      "last_event_at": "2024-08-28T03:28:24+00:00",
-      "stale_hours": 11386.125462642778,
-      "url": "https://github.com/valkey-io/valkey/pull/906"
-    },
-    {
-      "number": 929,
-      "title": "Remove direct reference to conn->fd and use the connection abstraction",
-      "author": "naglera",
-      "reviewers": [],
-      "created_at": "2024-08-21T11:42:13Z",
-      "last_event_at": "2024-09-01T07:56:13+00:00",
-      "stale_hours": 11285.661851531666,
-      "url": "https://github.com/valkey-io/valkey/pull/929"
-    },
-    {
-      "number": 974,
-      "title": "Fix data loss when the old primary takes over the slots after online",
-      "author": "enjoy-binbin",
-      "reviewers": [],
-      "created_at": "2024-08-31T11:32:07Z",
-      "last_event_at": "2024-09-02T09:52:46+00:00",
-      "stale_hours": 11259.719351531667,
-      "url": "https://github.com/valkey-io/valkey/pull/974"
+      "created_at": "2025-11-06T10:14:11Z",
+      "stale_hours": 939.63,
+      "stale_days": 39.2,
+      "url": "https://github.com/valkey-io/valkey/pull/2811"
     }
   ]
 }
